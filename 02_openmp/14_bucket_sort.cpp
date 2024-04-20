@@ -18,20 +18,22 @@ int main() {
   std::vector<int> offset(range,0);
   std::vector<int> tmp(range,0);
   #pragma omp parallel for
-  for (int i=0;i<n;i++) {
-    offset[i]= bucket[i];
+  for (int i=1;i<range;i++) {
+    offset[i]= bucket[i-1];
   }
   #pragma omp parallel
-  for (int x = 1; x<n;x<<=1) {
-    for (int i=0;i<n;i++){
-      tmp[i]=bucket[i];
+  for (int x = 1; x<range;x<<=1) {
+    #pragma omp for
+    for (int i=0;i<range;i++){
+      tmp[i]=offset[i];
     }
-    for (int i=x;i<n;i++){
-      bucket[i]=tmp[i-x];
+    #pragma omp for
+    for (int i=x;i<range;i++){
+      offset[i]+=tmp[i-x];
     }
   }
-  for (int i=1; i<range; i++) 
-    offset[i] = offset[i-1] + bucket[i-1];
+  // for (int i=1; i<range; i++) 
+  //   offset[i] = offset[i-1] + bucket[i-1];
   #pragma omp parallel for
   for (int i=0; i<range; i++) {
     int j = offset[i];
